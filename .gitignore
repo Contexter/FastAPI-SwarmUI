@@ -1,11 +1,11 @@
-# Xcode
-#
-# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+# ----------------------------
+# Xcode / macOS (original)
+# ----------------------------
 
 ## User settings
 xcuserdata/
 
-## Obj-C/Swift specific
+## Obj-C/Swift
 *.hmap
 
 ## App packaging
@@ -18,45 +18,147 @@ timeline.xctimeline
 playground.xcworkspace
 
 # Swift Package Manager
-#
-# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
-# Package.pins
-# Package.resolved
-# *.xcodeproj
-#
-# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
-# hence it is not needed unless you have added a package configuration file to your project
-# .swiftpm
-
 .build/
 
 # CocoaPods
-#
-# We recommend against adding the Pods directory to your .gitignore. However
-# you should judge for yourself, the pros and cons are mentioned at:
-# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
-#
+# (Pods/ is optional; uncomment if you vendor-check Pods)
 # Pods/
-#
-# Add this line if you want to avoid checking in source code from the Xcode workspace
-# *.xcworkspace
 
 # Carthage
-#
-# Add this line if you want to avoid checking in source code from Carthage dependencies.
-# Carthage/Checkouts
-
 Carthage/Build/
 
 # fastlane
-#
-# It is recommended to not store the screenshots in the git repo.
-# Instead, use fastlane to re-generate the screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/#source-control
-
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# ----------------------------
+# General macOS
+# ----------------------------
+.DS_Store
+
+# ----------------------------
+# Python / FastAPI
+# ----------------------------
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff (if ever used)
+*.log
+
+# FastAPI / SQLModel local DB
+*.sqlite
+*.sqlite3
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env/
+.venv/
+
+# Credentials / environment variables
+.env
+.env.*
+
+# VSCode
+.vscode/
+
+# PyCharm (and other JetBrains IDEs)
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Rope project settings
+.ropeproject
+
+# Pylint
+pylint-report.txt
+pylint-global.txt
+
+# ----------------------------
+# Docker (optional)
+# ----------------------------
+# If you generate any Dockerfiles/templates that you don’t want checked in:
+# Dockerfile.test
+# docker-compose.override.yml
+
+# Ignore built images (if you accidentally store them)
+*.tar
+
+# ----------------------------
+# Miscellaneous
+# ----------------------------
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Ignore macOS lock files
+*.lock
+
+# End of .gitignore
