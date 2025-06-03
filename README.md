@@ -42,26 +42,34 @@ mkdir ~/FastAPISwarmUI
 cd ~/FastAPISwarmUI
 ```
 
-Inside that folder, create a file called `orchestrator-openapi.json` and paste your entire FastAPI OpenAPI definition into it. For example:
+Inside that folder, create a file called `orchestrator-openapi.json` and paste your entire FastAPI OpenAPI definition into it. This here the exact openAPI the provided FastAPI backend publishes automatically:
 
 
 ```bash
 cat > orchestrator-openapi.json <<EOF
 {
-  "openapi":"3.1.0",
-  "info":{"title":"FountainAI Orchestrator API","version":"1.0.0"},
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FountainAI Orchestrator API",
+    "version": "1.0.0"
+  },
   "paths": {
     "/v1/health": {
       "get": {
-        "tags":["Orchestrator"],
-        "summary":"Health",
-        "operationId":"health_v1_health_get",
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Health",
+        "description": "Returns {\"status\":\"ok\",\"uptime\":\"XhYmZs\"}.",
+        "operationId": "health",
         "responses": {
           "200": {
-            "description":"Successful Response",
+            "description": "Successful Response",
             "content": {
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/HealthResponse"}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
               }
             }
           }
@@ -70,474 +78,1079 @@ cat > orchestrator-openapi.json <<EOF
     },
     "/v1/services": {
       "get": {
-        "tags":["Orchestrator"],
-        "summary":"List Services",
-        "operationId":"list_services_v1_services_get",
-        "parameters":[
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "List Services",
+        "description": "Retrieve a paginated list of services.\nOptional filter on `status` if provided.",
+        "operationId": "list_services",
+        "parameters": [
           {
-            "name":"limit","in":"query","required":false,
-            "schema":{"type":"integer","minimum":1,"default":50}
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Limit",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Limit"
           },
           {
-            "name":"offset","in":"query","required":false,
-            "schema":{"type":"integer","minimum":0,"default":0}
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Offset",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Offset"
           },
           {
-            "name":"status","in":"query","required":false,
-            "schema":{
-              "anyOf":[
-                {"type":"string","pattern":"^(running|updating|error)$"},
-                {"type":"null"}
-              ]
-            }
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(running|updating|error)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Status",
+              "title": "Status"
+            },
+            "description": "Status"
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ServiceListResponse"}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceListResponse"
+                }
               }
             }
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       },
-      "post":{
-        "tags":["Orchestrator"],
-        "summary":"Create Service",
-        "operationId":"create_service_v1_services_post",
-        "parameters":[
+      "post": {
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Create Service",
+        "description": "Create a new service.  \n- **name** (query parameter): unique service name  \n- **spec** (JSON body): details conforming to ServiceSpec",
+        "operationId": "create_service",
+        "parameters": [
           {
-            "name":"name","in":"query","required":true,
-            "schema":{"type":"string"}
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Name",
+              "title": "Name"
+            },
+            "description": "Name"
           }
         ],
-        "requestBody":{
-          "required":true,
-          "content":{
-            "application/json":{
-              "schema":{"$ref":"#/components/schemas/ServiceSpec"}
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceSpec"
+              }
             }
           }
         },
-        "responses":{
-          "201":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ServiceDetail"}
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceDetail"
+                }
               }
             }
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/v1/services/{service}": {
       "get": {
-        "tags":["Orchestrator"],
-        "summary":"Get Service",
-        "operationId":"get_service_v1_services__service__get",
-        "parameters":[
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Get Service",
+        "description": "Fetch detailed information about a single service.",
+        "operationId": "get_service",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ServiceDetail"}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceDetail"
+                }
               }
             }
           },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       },
       "delete": {
-        "tags":["Orchestrator"],
-        "summary":"Delete Service",
-        "operationId":"delete_service_v1_services__service__delete",
-        "parameters":[
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Delete Service",
+        "description": "Delete a service by name. Returns HTTP 204 on success.",
+        "operationId": "delete_service",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "responses":{
-          "204":{ "description":"Successful Response" },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
-          "422":{ "description":"Validation Error" }
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/v1/services/{service}/deploy": {
-      "post":{
-        "tags":["Orchestrator"],
-        "summary":"Deploy Service",
-        "operationId":"deploy_service_v1_services__service__deploy_post",
-        "parameters":[
+      "post": {
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Deploy Service",
+        "description": "Trigger a deployment for the specified service.",
+        "operationId": "deploy_service",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/DeployResponse"}
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeployRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeployResponse"
+                }
               }
             }
           },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/v1/deploy": {
-      "post":{
-        "tags":["Orchestrator"],
-        "summary":"Batch Deploy",
-        "operationId":"batch_deploy_v1_deploy_post",
-        "requestBody":{
-          "required":true,
-          "content":{
-            "application/json":{
-              "schema":{"$ref":"#/components/schemas/DeployRequest"}
+      "post": {
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Batch Deploy",
+        "description": "Accepts a list of service names in `request.services`.  \nReturns a BatchDeployResponse with an array of DeployResponse objects.",
+        "operationId": "batch_deploy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeployRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchDeployResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
             }
           }
-        },
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/BatchDeployResponse"}
-              }
-            }
-          },
-          "400":{
-            "description":"Bad Request",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ErrorResponse"}
-              }
-            }
-          },
-          "422":{ "description":"Validation Error" }
         }
       }
     },
     "/v1/services/{service}/config": {
       "get": {
-        "tags":["Orchestrator"],
-        "summary":"Get Config",
-        "operationId":"get_config_v1_services__service__config_get",
-        "parameters":[
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Get Config",
+        "description": "Retrieve the current config (env & ports) for the specified service.",
+        "operationId": "get_config",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ConfigDetail"}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDetail"
+                }
               }
             }
           },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       },
       "patch": {
-        "tags":["Orchestrator"],
-        "summary":"Patch Config",
-        "operationId":"patch_config_v1_services__service__config_patch",
-        "parameters":[
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Patch Config",
+        "description": "Partially update the service configuration.\nOnly the fields provided in ConfigPatch will be modified.",
+        "operationId": "patch_config",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "requestBody":{
-          "required":true,
-          "content":{
-            "application/json":{
-              "schema":{"$ref":"#/components/schemas/ConfigPatch"}
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigPatch"
+              }
             }
           }
         },
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ConfigDetail"}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDetail"
+                }
               }
             }
           },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/v1/services/{service}/logs": {
-      "get":{
-        "tags":["Orchestrator"],
-        "summary":"Get Logs",
-        "operationId":"get_logs_v1_services__service__logs_get",
-        "parameters":[
+      "get": {
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Get Logs",
+        "description": "Return the last `tail` lines of logs for the given service.",
+        "operationId": "get_logs",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           },
           {
-            "name":"tail","in":"query","required":false,
-            "schema":{"type":"integer","minimum":1,"default":100}
+            "name": "tail",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Tail",
+              "default": 100,
+              "title": "Tail"
+            },
+            "description": "Tail"
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{"text/plain":{"schema":{"type":"string"}}}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
-          "404":{
-            "content":{"text/plain":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/v1/services/{service}/rollback": {
-      "post":{
-        "tags":["Orchestrator"],
-        "summary":"Rollback Service",
-        "operationId":"rollback_service_v1_services__service__rollback_post",
-        "parameters":[
+      "post": {
+        "tags": [
+          "Orchestrator"
+        ],
+        "summary": "Rollback Service",
+        "description": "Initiate a rollback for the specified service.",
+        "operationId": "rollback_service",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/DeployResponse"}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeployResponse"
+                }
               }
             }
           },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/v1/clientgen/{service}/regenerate": {
-      "post":{
-        "tags":["ClientGen"],
-        "summary":"Regenerate Client",
-        "operationId":"regenerate_client_v1_clientgen__service__regenerate_post",
-        "parameters":[
+      "post": {
+        "tags": [
+          "ClientGen"
+        ],
+        "summary": "Regenerate Client",
+        "description": "Trigger regeneration of the client SDK for the given service.",
+        "operationId": "regenerate_client",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ClientStatusResponse"}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientStatusResponse"
+                }
               }
             }
           },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/v1/clientgen/status/{service}": {
-      "get":{
-        "tags":["ClientGen"],
-        "summary":"Get Client Status",
-        "operationId":"get_client_status_v1_clientgen_status__service__get",
-        "parameters":[
+      "get": {
+        "tags": [
+          "ClientGen"
+        ],
+        "summary": "Get Client Status",
+        "description": "Return the current status of client SDK generation for the given service.",
+        "operationId": "get_client_status",
+        "parameters": [
           {
-            "name":"service","in":"path","required":true,
-            "schema":{"type":"string"}
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
           }
         ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{"$ref":"#/components/schemas/ClientStatusResponse"}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientStatusResponse"
+                }
               }
             }
           },
-          "404":{
-            "content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}},
-            "description":"Not Found"
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
           },
-          "422":{ "description":"Validation Error" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
         }
       }
     }
   },
   "components": {
     "schemas": {
-      "BatchDeployResponse":{
-        "type":"object",
-        "additionalProperties":{"$ref":"#/components/schemas/DeployResponse"}
+      "BatchDeployResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/DeployResponse"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "title": "BatchDeployResponse"
       },
-      "ClientStatusResponse":{
-        "type":"object",
-        "required":["service","last_generated_at","checksum","status"],
-        "properties":{
-          "service":{"type":"string"},
-          "last_generated_at":{"type":"string","format":"date-time"},
-          "checksum":{"type":"string"},
-          "status":{"type":"string"},
-          "error":{"anyOf":[{"type":"string"},{"type":"null"}]}
-        }
+      "ClientStatusResponse": {
+        "properties": {
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "last_generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Generated At"
+          },
+          "checksum": {
+            "type": "string",
+            "title": "Checksum"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "service",
+          "last_generated_at",
+          "checksum",
+          "status"
+        ],
+        "title": "ClientStatusResponse"
       },
-      "ConfigDetail":{
-        "type":"object",
-        "required":["env","ports"],
-        "properties":{
-          "env":{"type":"object","additionalProperties":{"type":"string"}},
-          "ports":{"type":"object","additionalProperties":{"type":"integer"}}
-        }
+      "ConfigDetail": {
+        "properties": {
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Env"
+          },
+          "ports": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Ports"
+          }
+        },
+        "type": "object",
+        "required": [
+          "env",
+          "ports"
+        ],
+        "title": "ConfigDetail"
       },
-      "ConfigPatch":{
-        "type":"object",
-        "properties":{
-          "env":{"anyOf":[{"type":"object","additionalProperties":{"type":"string"}},{"type":"null"}]},
-          "ports":{"anyOf":[{"type":"object","additionalProperties":{"type":"integer"}},{"type":"null"}]}
-        }
+      "ConfigPatch": {
+        "properties": {
+          "env": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Env"
+          },
+          "ports": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ports"
+          }
+        },
+        "type": "object",
+        "title": "ConfigPatch"
       },
-      "ConfigReference":{
-        "type":"object",
-        "required":["name","target"],
-        "properties":{
-          "name":{"type":"string"},
-          "target":{"type":"string"}
-        }
+      "ConfigReference": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "target"
+        ],
+        "title": "ConfigReference"
       },
-      "DeployRequest":{
-        "type":"object",
-        "required":["services"],
-        "properties":{
-          "services":{"type":"array","items":{"type":"string"}}
-        }
+      "DeployRequest": {
+        "properties": {
+          "services": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Services"
+          }
+        },
+        "type": "object",
+        "required": [
+          "services"
+        ],
+        "title": "DeployRequest"
       },
-      "DeployResponse":{
-        "type":"object",
-        "required":["status","message"],
-        "properties":{
-          "status":{"type":"string"},
-          "message":{"type":"string"}
-        }
+      "DeployResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "message"
+        ],
+        "title": "DeployResponse"
       },
-      "ErrorResponse":{
-        "type":"object",
-        "required":["code","message"],
-        "properties":{
-          "code":{"type":"integer"},
-          "message":{"type":"string"}
-        }
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorResponse"
       },
-      "HealthResponse":{
-        "type":"object",
-        "required":["status","uptime"],
-        "properties":{
-          "status":{"type":"string"},
-          "uptime":{"type":"string","format":"date-time"}
-        }
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
       },
-      "ServiceDetail":{
-        "type":"object",
-        "required":["name","status","ports","secrets","configs"],
-        "properties":{
-          "name":{"type":"string"},
-          "status":{"type":"string"},
-          "ports":{"type":"object","additionalProperties":{"type":"integer"}},
-          "secrets":{"type":"array","items":{"type":"string"}},
-          "configs":{"type":"array","items":{"$ref":"#/components/schemas/ConfigReference"}}
-        }
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "uptime": {
+            "type": "string",
+            "title": "Uptime"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "uptime"
+        ],
+        "title": "HealthResponse"
       },
-      "ServiceListResponse":{
-        "type":"object",
-        "required":["services","total","limit","offset"],
-        "properties":{
-          "services":{"type":"array","items":{"$ref":"#/components/schemas/ServiceDetail"}},
-          "total":{"type":"integer"},
-          "limit":{"type":"integer"},
-          "offset":{"type":"integer"}
-        }
+      "ServiceDetail": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "ports": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Ports"
+          },
+          "secrets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Secrets"
+          },
+          "configs": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigReference"
+            },
+            "type": "array",
+            "title": "Configs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status",
+          "ports",
+          "secrets",
+          "configs"
+        ],
+        "title": "ServiceDetail"
       },
-      "ServiceSpec":{
-        "type":"object",
-        "required":["image"],
-        "properties":{
-          "image":{"type":"string"},
-          "ports":{"anyOf":[{"type":"object","additionalProperties":{"type":"integer"}},{"type":"null"}],"default":{}},
-          "secrets":{"anyOf":[{"type":"array","items":{"type":"string"}},{"type":"null"}],"default":[]},
-          "configs":{"anyOf":[{"type":"array","items":{"$ref":"#/components/schemas/ConfigReference"}},{"type":"null"}],"default":[]}
-        }
+      "ServiceListResponse": {
+        "properties": {
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceDetail"
+            },
+            "type": "array",
+            "title": "Services"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "services",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "ServiceListResponse"
       },
-      "ValidationError":{
-        "type":"object",
-        "required":["loc","msg","type"],
-        "properties":{
-          "loc":{"type":"array","items":{"anyOf":[{"type":"string"},{"type":"integer"}]}},
-          "msg":{"type":"string"},
-          "type":{"type":"string"}
-        }
+      "ServiceSpec": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "title": "Image"
+          },
+          "ports": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ports",
+            "default": {
+            }
+          },
+          "secrets": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secrets",
+            "default": [
+            ]
+          },
+          "configs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConfigReference"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Configs",
+            "default": [
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "ServiceSpec"
       },
-      "HTTPValidationError":{
-        "type":"object",
-        "properties":{
-          "detail":{"type":"array","items":{"$ref":"#/components/schemas/ValidationError"}}
-        }
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://fountain.coach"
+    }
+  ]
 }
 EOF
 ```
